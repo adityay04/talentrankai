@@ -1,7 +1,11 @@
+
 from datetime import datetime, timezone
+
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.core.database import Base
+
 
 class Candidate(Base):
     __tablename__ = "candidates"
@@ -16,6 +20,11 @@ class Candidate(Base):
         ForeignKey("jobs.id"),
         nullable=False,
         index=True
+    )
+
+    source_filename: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
     )
 
     name: Mapped[str] = mapped_column(

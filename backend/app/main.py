@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.api.jobs import router as jobs_router
+from app.api.candidates import router as candidates_router
 from app import models
 
 @asynccontextmanager
@@ -18,6 +19,8 @@ app = FastAPI(
 )
 
 app.include_router(jobs_router)
+app.include_router(candidates_router)
+
 
 @app.get("/health", tags=["Health"])
 def health_check():

@@ -1,3 +1,4 @@
+
 fastapi==0.121.3
 uvicorn[standard]==0.38.0
 sqlalchemy==2.0.44
@@ -7,3 +8,5 @@ python-multipart==0.0.20
 python-dotenv==1.2.1
 pytest==9.0.1
 httpx==0.28.1
+PyMuPDF
+python-docx
