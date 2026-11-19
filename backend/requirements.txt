@@ -10,3 +10,4 @@ pytest==9.0.1
 httpx==0.28.1
 PyMuPDF
 python-docx
+sentence-transformers

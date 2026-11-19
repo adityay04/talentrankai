@@ -24,7 +24,8 @@ class MatchResult(Base):
         nullable=False
     )
 
-    skill_score: Mapped[float] = mapped_column(
+    required_skill_score: Mapped[float] = mapped_column(
+        "skill_score",
         Float,
         nullable=False
     )
@@ -39,7 +40,8 @@ class MatchResult(Base):
         nullable=False
     )
 
-    qualification_score: Mapped[float] = mapped_column(
+    preferred_skill_score: Mapped[float] = mapped_column(
+        "qualification_score",
         Float,
         nullable=False
     )

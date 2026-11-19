@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.core.database import Base, engine
 from app.api.jobs import router as jobs_router
 from app.api.candidates import router as candidates_router
+from app.api.matching import router as matching_router
 from app import models
 
 @asynccontextmanager
@@ -20,6 +21,7 @@ app = FastAPI(
 
 app.include_router(jobs_router)
 app.include_router(candidates_router)
+app.include_router(matching_router)
 
 
 @app.get("/health", tags=["Health"])
