@@ -1,15 +1,39 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
-connect_args = {}
 
-if settings.database_url.startswith("sqlite"):
+database_url = settings.database_url
+
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql+psycopg://",
+        1
+    )
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace(
+        "postgresql://",
+        "postgresql+psycopg://",
+        1
+    )
+
+connect_args = {}
+engine_options = {}
+
+if database_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+else:
+    engine_options = {
+        "poolclass": NullPool,
+        "pool_pre_ping": True
+    }
 
 engine = create_engine(
-    settings.database_url,
-    connect_args=connect_args
+    database_url,
+    connect_args=connect_args,
+    **engine_options
 )
 
 SessionLocal = sessionmaker(
@@ -18,8 +42,10 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
+
 class Base(DeclarativeBase):
     pass
+
 
 def get_db():
     db = SessionLocal()
