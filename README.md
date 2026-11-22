@@ -89,87 +89,16 @@ Skill normalization maps common aliases and variations to a consistent form. Exa
 
 Preferred skills contribute to the score, but they carry less weight than required skills. 6. Overall Score and Ranking
 The overall score is a weighted sum:
-\[
-\text{Overall Score} = 0.40M + 0.30R + 0.20E + 0.10P
-\]
+Overall Score = 0.40M + 0.30R + 0.20E + 0.10P
 Component Symbol Weight
 Semantic similarity M 40%
 Required skills R 30%
 Experience E 20%
 Preferred skills P 10%
 
-Because every component is on a 0–100 scale and the weights sum to 1.00, the overall score is also on a 0–100 scale.
+Because every component is on a 0 - 100 scale and the weights sum to 1.00, the overall score is also on a 0–100 scale.
 
 Candidates are sorted in descending order of overall score. The ranking is intended to support recruiter review, not replace human judgment.
-Application Architecture
-The application uses a frontend-backend architecture.
-TalentRank
-├── Frontend: React + TypeScript
-│ ├── Job management
-│ ├── Resume upload
-│ ├── Candidate ranking
-│ └── Candidate profiles
-│
-└── Backend: FastAPI
-├── API routes
-├── Resume parsing and extraction
-├── Job description processing
-├── Skill normalization
-├── Embedding generation
-├── Matching and scoring
-└── SQLAlchemy database layer
-└── SQLite
-Project Structure
-talentrank/
-├── backend/
-│ ├── app/
-│ │ ├── api/
-│ │ │ ├── candidates.py
-│ │ │ ├── jobs.py
-│ │ │ └── matching.py
-│ │ ├── core/
-│ │ │ └── database.py
-│ │ ├── models/
-│ │ │ ├── candidate.py
-│ │ │ ├── job.py
-│ │ │ └── match_result.py
-│ │ ├── schemas/
-│ │ │ ├── candidate.py
-│ │ │ ├── job.py
-│ │ │ └── match.py
-│ │ ├── services/
-│ │ │ ├── embedding_service.py
-│ │ │ ├── jd_parser.py
-│ │ │ ├── matching_service.py
-│ │ │ ├── resume_extractor.py
-│ │ │ ├── resume_parser.py
-│ │ │ └── skill_service.py
-│ │ └── main.py
-│ ├── requirements.txt
-│ └── .gitignore
-│
-├── frontend/
-│ ├── src/
-│ │ ├── app/
-│ │ ├── components/
-│ │ ├── features/
-│ │ │ ├── candidates/
-│ │ │ └── jobs/
-│ │ ├── lib/
-│ │ ├── pages/
-│ │ ├── styles/
-│ │ ├── App.tsx
-│ │ └── main.tsx
-│ ├── package.json
-│ └── .gitignore
-│
-└── README.md
-Getting Started
-Prerequisites
-
-- Python 3.10 or later
-- Node.js and npm
-- Git
 
 1. Clone the Repository
    git clone https://github.com/adityay04/talentrank.git
