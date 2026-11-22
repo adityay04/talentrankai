@@ -1,90 +1,72 @@
-# TalentRank - AI-Powered Resume Matching & Candidate Ranking
+TalentRank - AI-Powered Resume Matching & Candidate Ranking
+TalentRank is a full-stack recruitment application that helps recruiters evaluate, compare, and rank candidates against a job description. It combines resume parsing, semantic similarity, skill matching, and experience evaluation to produce a score from 0–100 with supporting explanations.
 
-TalentRank is an AI-powered recruitment platform that helps recruiters evaluate, compare, and rank candidates against job descriptions. It uses semantic similarity, skill matching, and experience evaluation to generate candidate scores and explain why a candidate is a good fit for a role.
-
-The goal is to make resume screening faster, more consistent, and more transparent through AI-assisted candidate evaluation.
-
-## Features
-
-### Job Management
+The goal is to make resume screening faster, more consistent, and more transparent. TalentRank is an AI-assisted decision-support tool; it does not make hiring decisions automatically.
+Features
+Job Management
 
 - Create and manage job descriptions.
 - Define required and preferred skills.
-- Specify minimum experience requirements.
+- Specify minimum experience.
 - Add educational qualifications.
-- View existing job listings.
-
-### Resume Upload & Parsing
-
-- Upload multiple resumes in a single batch.
-- Supports PDF and DOCX formats.
-- Extract candidate information, including:
-  - Candidate name
-  - Email address
-  - Total work experience
-  - Technical skills
-  - Educational qualifications
-- Validate uploaded files by format, file signature, and size.
-- Handle individual upload failures without stopping the entire batch.
-
-### AI-Powered Resume Matching
-
-- Generate semantic embeddings using Sentence Transformers.
-- Compare job descriptions with candidate resume content.
+- View existing jobs.
+  Resume Upload and Parsing
+- Upload multiple resumes in one batch.
+- Supports PDF and DOCX.
+- Extract candidate name, email, work experience, skills, and education when available in the document.
+- Validate file type, file signature, and file size.
+- Continue processing a batch when an individual file fails.
+  AI-Powered Matching
+- Generate text embeddings with Sentence Transformers.
+- Compare job requirements with resume content using semantic similarity.
 - Evaluate required and preferred skills.
-- Calculate experience scores.
-- Generate an overall candidate matching score between 0 and 100.
-- Provide explanations for candidate evaluations.
-
-### Candidate Ranking Dashboard
-
-- Rank candidates based on their overall matching scores.
-- Display individual scoring components.
+- Evaluate candidate experience against the job's minimum experience.
+- Calculate an overall score from 0–100.
+- Provide a score breakdown and evaluation explanation.
+  Candidate Ranking and Profiles
+- Rank candidates by overall score.
+- Display score components.
 - Show matched and missing skills.
-- Identify top-performing candidates.
-- Access detailed candidate profiles.
+- Compare candidate experience with the job requirement.
+- Open detailed candidate profiles.
+  Technology Stack
+  Layer Technology
+  Frontend React, TypeScript, Vite
+  Styling Tailwind CSS, custom CSS
+  Routing React Router
+  Icons Lucide React
+  Backend Python, FastAPI
+  Database SQLite
+  ORM SQLAlchemy
+  Validation Pydantic
+  Resume parsing PyMuPDF, python-docx
+  Embeddings Sentence Transformers
+  Embedding model sentence-transformers/all-MiniLM-L6-v2
+  API testing Thunder Client
+  Version control Git, GitHub
 
-### Detailed Candidate Profiles
+How the Matching System Works
+TalentRank evaluates each candidate using four components. Each component is represented on a 0–100 scale.
 
-- View candidate information and extracted resume details.
-- Review AI-generated matching scores.
-- Explore semantic, skill, and experience evaluations.
-- See matched and missing skills.
-- Review education and professional experience information.
+1. Resume and Job Description Processing
+   The recruiter creates a job and supplies its description, required skills, preferred skills, minimum experience, and qualifications.
 
-## Technology Stack
+When resumes are uploaded, the backend:
 
-| Layer           | Technologies             |
-| --------------- | ------------------------ |
-| Frontend        | React, TypeScript, Vite  |
-| Styling         | Tailwind CSS, Custom CSS |
-| Routing         | React Router             |
-| Icons           | Lucide React             |
-| Backend         | Python, FastAPI          |
-| Database        | SQLite                   |
-| ORM             | SQLAlchemy               |
-| Validation      | Pydantic                 |
-| Resume Parsing  | PyMuPDF, python-docx     |
-| AI / NLP        | Sentence Transformers    |
-| Embedding Model | all-MiniLM-L6-v2         |
-| API Testing     | Thunder Client           |
-| Version Control | Git, GitHub              |
+1. Validates the uploaded file.
+2. Extracts text from PDF or DOCX.
+3. Parses candidate details such as skills, education, and experience.
+4. Stores candidate information in the database.
+   The quality of extracted information depends on the structure and readability of the resume. Missing or unusual formatting can affect extraction.
+5. Semantic Similarity (M)
+   TalentRank uses sentence-transformers/all-MiniLM-L6-v2 to encode the job description and resume text as numerical vector embeddings.
 
-## AI Matching Methodology
+Cosine similarity measures the direction-based similarity between the two vectors. The similarity is converted to a 0–100 semantic score.
 
-TalentRank combines semantic similarity, skill matching, and experience evaluation to calculate an overall candidate score.
+This component can recognize related wording and concepts, rather than relying only on exact keyword matches. It is not a guarantee that a candidate is qualified. 3. Required Skills (R)
+The system compares the job's required skills with the candidate's extracted skills.
 
-### 1. Semantic Similarity
-
-The system uses the `sentence-transformers/all-MiniLM-L6-v2` model to convert job descriptions and candidate resumes into vector embeddings.
-
-Cosine similarity is used to measure how closely the candidate's resume aligns with the job description.
-
-### 2. Skill Matching
-
-The system identifies required and preferred skills from the job description and compares them against the candidate's extracted skills.
-
-Skill normalization handles common variations and aliases, such as:
+Skill normalization maps common aliases and variations to a consistent form. Examples include:
 
 - JS → JavaScript
 - ReactJS → React
@@ -92,307 +74,204 @@ Skill normalization handles common variations and aliases, such as:
 - Postgres → PostgreSQL
 - ML → Machine Learning
 - Fast API → FastAPI
+  The required-skill score reflects the proportion of required skills found in the candidate's normalized skill set. If no required skills are specified, the component is handled so that it does not penalize the candidate for an empty requirement.
 
-### 3. Experience Evaluation
+4. Experience (E)
+   The candidate's parsed total experience is compared with the job's minimum experience.
 
-Candidate experience is evaluated against the minimum experience specified in the job description.
+- A candidate who meets or exceeds the minimum receives full experience credit.
+- A candidate below the minimum receives proportional credit based on the experience available.
+- When the job specifies zero minimum experience, the experience component does not penalize the candidate.
+  Experience extracted from resumes is an estimate and should be reviewed when dates or employment history are ambiguous.
 
-Candidates meeting the requirement receive full experience credit. Candidates below the requirement receive a proportional score.
+5. Preferred Skills (P)
+   Preferred skills are compared with the candidate's normalized extracted skills. The score reflects the proportion of preferred skills found.
 
-### 4. Overall Matching Score
-
-The final score is calculated using the following weighted formula:
-
+Preferred skills contribute to the score, but they carry less weight than required skills. 6. Overall Score and Ranking
+The overall score is a weighted sum:
 \[
-Overall = 0.40M + 0.30R + 0.20E + 0.10P
+\text{Overall Score} = 0.40M + 0.30R + 0.20E + 0.10P
 \]
+Component Symbol Weight
+Semantic similarity M 40%
+Required skills R 30%
+Experience E 20%
+Preferred skills P 10%
 
-Where:
+Because every component is on a 0–100 scale and the weights sum to 1.00, the overall score is also on a 0–100 scale.
 
-| Component               | Weight |
-| ----------------------- | -----: |
-| Semantic Similarity (M) |    40% |
-| Required Skills (R)     |    30% |
-| Experience (E)          |    20% |
-| Preferred Skills (P)    |    10% |
-
-The final score ranges from 0 to 100.
-
-Candidates are ranked in descending order of their overall matching scores.
-
-## Application Architecture
-
-The application follows a frontend-backend architecture.
-
-```text
-                    TalentRank
-                        |
-             +----------+----------+
-             |                     |
-          Frontend               Backend
-             |                     |
-       React + TypeScript        FastAPI
-             |                     |
-       React Router          API Endpoints
-                                   |
-                          +--------+--------+
-                          |        |        |
-                       Parsing  Matching  Job Services
-                          |        |        |
-                          |    Sentence     |
-                          |   Transformers  |
-                          |        |        |
-                          +--------+--------+
-                                   |
-                              SQLAlchemy
-                                   |
-                                SQLite
-```
-
-## Project Structure
-
-```text
-talentrank/
+Candidates are sorted in descending order of overall score. The ranking is intended to support recruiter review, not replace human judgment.
+Application Architecture
+The application uses a frontend-backend architecture.
+TalentRank
+├── Frontend: React + TypeScript
+│ ├── Job management
+│ ├── Resume upload
+│ ├── Candidate ranking
+│ └── Candidate profiles
 │
+└── Backend: FastAPI
+├── API routes
+├── Resume parsing and extraction
+├── Job description processing
+├── Skill normalization
+├── Embedding generation
+├── Matching and scoring
+└── SQLAlchemy database layer
+└── SQLite
+Project Structure
+talentrank/
 ├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── candidates.py
-│   │   │   ├── jobs.py
-│   │   │   └── matching.py
-│   │   │
-│   │   ├── core/
-│   │   │   └── database.py
-│   │   │
-│   │   ├── models/
-│   │   │   ├── candidate.py
-│   │   │   ├── job.py
-│   │   │   └── match_result.py
-│   │   │
-│   │   ├── schemas/
-│   │   │   ├── candidate.py
-│   │   │   ├── job.py
-│   │   │   └── match.py
-│   │   │
-│   │   ├── services/
-│   │   │   ├── embedding_service.py
-│   │   │   ├── jd_parser.py
-│   │   │   ├── matching_service.py
-│   │   │   ├── resume_extractor.py
-│   │   │   ├── resume_parser.py
-│   │   │   └── skill_service.py
-│   │   │
-│   │   └── main.py
-│   │
-│   ├── requirements.txt
-│   └── venv/
+│ ├── app/
+│ │ ├── api/
+│ │ │ ├── candidates.py
+│ │ │ ├── jobs.py
+│ │ │ └── matching.py
+│ │ ├── core/
+│ │ │ └── database.py
+│ │ ├── models/
+│ │ │ ├── candidate.py
+│ │ │ ├── job.py
+│ │ │ └── match_result.py
+│ │ ├── schemas/
+│ │ │ ├── candidate.py
+│ │ │ ├── job.py
+│ │ │ └── match.py
+│ │ ├── services/
+│ │ │ ├── embedding_service.py
+│ │ │ ├── jd_parser.py
+│ │ │ ├── matching_service.py
+│ │ │ ├── resume_extractor.py
+│ │ │ ├── resume_parser.py
+│ │ │ └── skill_service.py
+│ │ └── main.py
+│ ├── requirements.txt
+│ └── .gitignore
 │
 ├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   └── AppLayout.tsx
-│   │   │
-│   │   ├── components/
-│   │   │   └── layout/
-│   │   │       ├── Sidebar.tsx
-│   │   │       └── Topbar.tsx
-│   │   │
-│   │   ├── features/
-│   │   │   ├── candidates/
-│   │   │   │   ├── candidates.api.ts
-│   │   │   │   └── candidate.types.ts
-│   │   │   │
-│   │   │   └── jobs/
-│   │   │       ├── job.api.ts
-│   │   │       └── job.types.ts
-│   │   │
-│   │   ├── lib/
-│   │   │   └── api.ts
-│   │   │
-│   │   ├── pages/
-│   │   │   ├── DashboardPage.tsx
-│   │   │   ├── JobManagementPage.tsx
-│   │   │   ├── ResumeUploadPage.tsx
-│   │   │   ├── CandidateRankingPage.tsx
-│   │   │   ├── CandidateProfilePage.tsx
-│   │   │   └── PlaceholderPage.tsx
-│   │   │
-│   │   ├── styles/
-│   │   │   └── index.css
-│   │   │
-│   │   ├── App.tsx
-│   │   ├── index.css
-│   │   └── main.tsx
-│   │
-│   └── package.json
+│ ├── src/
+│ │ ├── app/
+│ │ ├── components/
+│ │ ├── features/
+│ │ │ ├── candidates/
+│ │ │ └── jobs/
+│ │ ├── lib/
+│ │ ├── pages/
+│ │ ├── styles/
+│ │ ├── App.tsx
+│ │ └── main.tsx
+│ ├── package.json
+│ └── .gitignore
 │
 └── README.md
-```
+Getting Started
+Prerequisites
 
-## Getting Started
-
-### Prerequisites
-
-- Python 3.10+
-- Node.js 22+
-- npm
+- Python 3.10 or later
+- Node.js and npm
 - Git
 
-### 1. Clone the Repository
+1. Clone the Repository
+   git clone https://github.com/adityay04/talentrank.git
+   cd talentrank
+2. Set Up the Backend
+   Open a terminal in the project root:
+   cd backend
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   Start the backend:
+   python -m uvicorn app.main:app --reload
+   The API runs at:
 
-```bash
-git clone https://github.com/YOUR_USERNAME/talentrank.git
-cd talentrank
-```
+- API: http://127.0.0.1:8000
+- Interactive API documentation: http://127.0.0.1:8000/docs
+  Keep this terminal running.
 
-### 2. Backend Setup
-
-Navigate to the backend directory:
-
-```bash
-cd backend
-```
-
-Create a virtual environment:
-
-```bash
-python -m venv venv
-```
-
-Activate it on Windows:
-
-```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Start the FastAPI development server:
-
-```bash
-python -m uvicorn app.main:app --reload
-```
-
-Backend runs at:
-
-`http://127.0.0.1:8000`
-
-Interactive API documentation:
-
-`http://127.0.0.1:8000/docs`
-
-### 3. Frontend Setup
-
-Open another terminal and navigate to the frontend directory:
-
-```bash
+If PowerShell blocks virtual-environment activation, run the following in the current terminal and then activate the environment again:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1 3. Set Up the Frontend
+Open a second terminal from the project root:
 cd frontend
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Start the Vite development server:
-
-```bash
 npm run dev
-```
+Open the local URL printed by Vite, typically:
 
-The frontend will be available at the local URL displayed by Vite, typically:
+http://localhost:5173
 
-`http://localhost:5173`
+Keep the frontend terminal running as well. 4. First Run Notes
 
-## API Endpoints
+- The SQLite database is created/configured by the backend application.
+- The Sentence Transformers model may be downloaded the first time the embedding service is initialized. This requires an internet connection and may take a few minutes.
+- Resume files are processed by the backend. Use test resumes that you have permission to use.
+  API Endpoints
+  Jobs
+  Method Endpoint Description
+  POST /jobs/ Create a job
+  GET /jobs/ Retrieve all jobs
+  GET /jobs/{job_id} Retrieve a specific job
 
-The following are the main implemented API routes.
+Candidates
+Method Endpoint Description
+POST /jobs/{job_id}/candidates/upload Upload multiple resumes
+GET /jobs/{job_id}/candidates/ Retrieve candidates for a job
+GET /jobs/{job_id}/candidates/{candidate_id} Retrieve candidate details
 
-### Jobs
+Matching
+Method Endpoint Description
+POST /jobs/{job_id}/matches/ Run matching and generate scores
+GET /jobs/{job_id}/matches/ Retrieve ranked matching results
+GET /jobs/{job_id}/matches/{candidate_id} Retrieve an individual matching result
 
-| Method | Endpoint         | Description             |
-| ------ | ---------------- | ----------------------- |
-| POST   | `/jobs/`         | Create a job            |
-| GET    | `/jobs/`         | Retrieve all jobs       |
-| GET    | `/jobs/{job_id}` | Retrieve a specific job |
+For request and response schemas, use the interactive API documentation at /docs.
+End-to-End Testing
+Test the complete workflow using the frontend or the API documentation:
 
-### Candidates
+1. Create a job with a description, required skills, preferred skills, minimum experience, and qualifications.
+2. Upload a batch of PDF or DOCX resumes.
+3. Confirm that successfully processed candidates appear in the candidate list.
+4. Confirm that individual file failures do not prevent the rest of the batch from being processed.
+5. Run matching for the job.
+6. Confirm that candidates are ranked by overall score.
+7. Open a candidate profile.
+8. Review the score components, matched skills, missing skills, experience evaluation, and explanation.
+9. Repeat with another job to verify that candidates and results remain associated with the correct job.
+   The upload endpoint supports batches of up to 50 files. Test with at least 10 resumes for a representative batch.
 
-| Method | Endpoint                                   | Description                   |
-| ------ | ------------------------------------------ | ----------------------------- |
-| POST   | `/jobs/{job_id}/candidates/upload`         | Upload multiple resumes       |
-| GET    | `/jobs/{job_id}/candidates/`               | Retrieve candidates for a job |
-| GET    | `/jobs/{job_id}/candidates/{candidate_id}` | Retrieve candidate details    |
+The backend API has been tested using Thunder Client. The complete frontend workflow has been exercised, and the frontend production build has been verified.
+Current Project Status
+Implemented:
 
-### Matching
+- Job creation and management
+- Batch PDF and DOCX resume upload
+- Resume text extraction and candidate information parsing
+- Job description processing
+- Semantic embedding generation
+- Skill normalization
+- Required and preferred skill matching
+- Experience evaluation
+- Weighted candidate scoring
+- Database-integrated match results
+- Candidate ranking dashboard
+- Detailed candidate profiles
+- Matching explanations
+- Frontend loading, error, and empty states
+  Limitations and Responsible Use
+- Resume parsing depends on document quality, layout, and available text. Scanned or unusually formatted documents may not parse reliably.
+- Extracted experience, skills, and education can contain errors and should be checked against the original resume.
+- Semantic similarity is a relevance signal, not proof of capability.
+- The score is a configurable heuristic combining several signals; it is not a validated hiring or performance prediction.
+- Recruiters should review the original resume and use consistent, job-related criteria before making decisions.
+- Use synthetic or appropriately licensed resumes for testing. Do not commit personal candidate data to the repository.
+  Future Improvements
+  Potential next steps include:
+- Persistent production database configuration
+- More robust extraction for scanned resumes using OCR
+- Expanded skill taxonomy and domain-specific normalization
+- More comprehensive automated tests
+- Authentication and role-based access
+- Evaluation against a labeled resume–job dataset to calibrate matching weights
+  TalentRank - AI-assisted resume intelligence for more transparent candidate screening.
 
-| Method | Endpoint                                | Description                            |
-| ------ | --------------------------------------- | -------------------------------------- |
-| POST   | `/jobs/{job_id}/matches/`               | Run AI matching                        |
-| GET    | `/jobs/{job_id}/matches/`               | Retrieve ranked matching results       |
-| GET    | `/jobs/{job_id}/matches/{candidate_id}` | Retrieve an individual matching result |
-
-## Testing
-
-Backend API endpoints have been tested using Thunder Client.
-
-The application workflow has been tested end to end:
-
-1. Create a job description.
-2. Upload candidate resumes.
-3. Extract candidate information.
-4. Generate semantic embeddings.
-5. Run AI-based matching.
-6. Calculate candidate scores.
-7. Display ranked candidates.
-8. Open detailed candidate profiles.
-9. Review AI-generated evaluation explanations.
-
-The frontend production build has also been verified.
-
-## Current Development Status
-
-**Completed through Day 5**
-
-| Development Phase                | Status    |
-| -------------------------------- | --------- |
-| Backend foundation and database  | Completed |
-| Resume parsing and extraction    | Completed |
-| Semantic embedding generation    | Completed |
-| Skill normalization and matching | Completed |
-| Job description processing       | Completed |
-| Weighted candidate scoring       | Completed |
-| Database-integrated matching     | Completed |
-| React frontend foundation        | Completed |
-| Job management interface         | Completed |
-| Resume upload interface          | Completed |
-| Candidate ranking dashboard      | Completed |
-| Detailed candidate profiles      | Completed |
-| End-to-end application workflow  | Tested    |
-
-## Upcoming Improvements
-
-- Comprehensive backend edge-case testing.
-- Further validation of matching accuracy and scoring.
-- Improved error handling and loading states.
-- Responsive UI refinement.
-- Final regression testing.
-- Project documentation and demo preparation.
-
-## Important Notes
-
-- Use synthetic or publicly licensed resumes for testing.
-- The current database configuration uses SQLite.
-- The matching score is an AI-assisted ranking signal, not a definitive hiring decision.
-- Recruiters should review candidate profiles and supporting information before making hiring decisions.
-
----
-
-**TalentRank** — Making recruitment smarter through AI-powered resume intelligence.
-
-Built with React, TypeScript, FastAPI, Python, and Sentence Transformers.
+Built with React, TypeScript, FastAPI, Python, SQLAlchemy, SQLite, and Sentence Transformers.
