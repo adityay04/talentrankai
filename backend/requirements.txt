@@ -1,4 +1,7 @@
 
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
 fastapi==0.121.3
 uvicorn[standard]==0.38.0
 sqlalchemy==2.0.44
@@ -6,8 +9,7 @@ pydantic==2.12.4
 pydantic-settings==2.11.0
 python-multipart==0.0.20
 python-dotenv==1.2.1
-pytest==9.0.1
-httpx==0.28.1
 PyMuPDF
 python-docx
-sentence-transformers
+sentence-transformers==6.3.0
+torch==2.12.0
