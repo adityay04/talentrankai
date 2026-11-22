@@ -38,18 +38,19 @@ function JobManagementPage() {
   const [form, setForm] = useState(initialForm);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [jobsError, setJobsError] = useState("");
   const [success, setSuccess] = useState("");
 
   async function loadJobs() {
     setLoadingJobs(true);
-    setError("");
+    setJobsError("");
 
     try {
       const data = await getJobs();
       setJobs(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load jobs.");
+      setJobsError(err instanceof Error ? err.message : "Unable to load jobs.");
     } finally {
       setLoadingJobs(false);
     }
@@ -65,7 +66,7 @@ function JobManagementPage() {
       [field]: value,
     }));
 
-    setError("");
+    setFormError("");
     setSuccess("");
   }
 
@@ -73,7 +74,7 @@ function JobManagementPage() {
     event.preventDefault();
 
     setSubmitting(true);
-    setError("");
+    setFormError("");
     setSuccess("");
 
     const payload: JobCreatePayload = {
@@ -93,7 +94,7 @@ function JobManagementPage() {
       setForm(initialForm);
       setSuccess(`"${createdJob.title}" was created successfully.`);
     } catch (err) {
-      setError(
+      setFormError(
         err instanceof Error ? err.message : "Unable to create the job.",
       );
     } finally {
@@ -304,13 +305,13 @@ function JobManagementPage() {
               </p>
             </div>
 
-            {error && (
+            {formError && (
               <div
                 role="alert"
                 className="flex items-start gap-3 rounded-xl border border-danger/20 bg-danger/5 p-4 text-sm text-danger"
               >
                 <X size={17} className="mt-0.5 shrink-0" />
-                <span>{error}</span>
+                <span>{formError}</span>
               </div>
             )}
 
@@ -377,7 +378,26 @@ function JobManagementPage() {
           </div>
 
           <div className="space-y-3">
-            {loadingJobs ? (
+            {jobsError ? (
+              <div
+                role="alert"
+                className="surface-card flex flex-col items-start gap-3 p-6 text-sm text-danger"
+              >
+                <p>{jobsError}</p>
+                <button
+                  type="button"
+                  onClick={() => void loadJobs()}
+                  disabled={loadingJobs}
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 font-semibold text-ink transition hover:bg-accent-soft disabled:opacity-50"
+                >
+                  <RefreshCw
+                    size={15}
+                    className={loadingJobs ? "animate-spin" : ""}
+                  />
+                  Try again
+                </button>
+              </div>
+            ) : loadingJobs ? (
               <div className="surface-card flex min-h-48 items-center justify-center gap-3 text-sm text-muted">
                 <LoaderCircle size={18} className="animate-spin" />
                 Loading jobs...
